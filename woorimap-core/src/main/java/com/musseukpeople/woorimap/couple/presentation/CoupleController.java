@@ -78,7 +78,7 @@ public class CoupleController {
     @OnlyCouple
     @DeleteMapping
     public ResponseEntity<ApiResponse<AccessTokenResponse>> deleteCouple(@Login LoginMember member) {
-        TokenDto tokenDto = coupleFacade.removeCouple(member);
+        TokenDto tokenDto = coupleFacade.breakUpCouple(member);
         AccessTokenResponse accessTokenResponse = new AccessTokenResponse(tokenDto.getValue());
 
         return ResponseEntity
