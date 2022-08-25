@@ -18,6 +18,7 @@ import com.musseukpeople.woorimap.couple.application.dto.response.CoupleMemeberR
 import com.musseukpeople.woorimap.couple.application.dto.response.CoupleResponse;
 import com.musseukpeople.woorimap.couple.application.dto.response.InviteCodeResponse;
 import com.musseukpeople.woorimap.couple.domain.Couple;
+import com.musseukpeople.woorimap.couple.exception.AlreadyBrokenCoupleException;
 import com.musseukpeople.woorimap.couple.exception.AlreadyCoupleException;
 import com.musseukpeople.woorimap.couple.exception.CreateCoupleFailException;
 import com.musseukpeople.woorimap.member.application.MemberService;
@@ -61,6 +62,8 @@ public class CoupleFacade {
 
         Couple couple = coupleService.getCoupleWithMemberById(coupleId);
 
+        validateBrokenCouple(couple);
+
         LocalDate startDate = couple.getStartDate();
         CoupleMemeberResponse coupleMemeberResponse = CoupleMemeberResponse.from(couple.getMyMember(memberId));
         CoupleMemeberResponse coupleYourResponse = CoupleMemeberResponse.from(couple.getOpponentMember(memberId));
@@ -85,6 +88,17 @@ public class CoupleFacade {
     }
 
     @Transactional
+    public TokenDto breakUpCouple(LoginMember member) {
+        Long coupleId = member.getCoupleId();
+        Long memberId = member.getId();
+
+        memberService.breakUpMembersByCoupleId(coupleId);
+        coupleService.breakUpCouple(coupleId);
+
+        return jwtProvider.createAccessToken(String.valueOf(memberId), null);
+    }
+
+    @Transactional
     public InviteCodeResponse createInviteCode(Long inviterId, LocalDateTime expireDate) {
         return inviteCodeService.createInviteCode(inviterId, expireDate);
     }
@@ -92,6 +106,12 @@ public class CoupleFacade {
     private void validateAlreadyCouple(Member foundInviter, Member foundReceiver) {
         if (foundInviter.isCouple() || foundReceiver.isCouple()) {
             throw new AlreadyCoupleException(ErrorCode.ALREADY_COUPLE);
+        }
+    }
+
+    private void validateBrokenCouple(Couple couple) {
+        if (couple.isBrokenUp()) {
+            throw new AlreadyBrokenCoupleException(ErrorCode.BROKEN_UP_COUPLE);
         }
     }
 

@@ -28,6 +28,11 @@ public class CoupleService {
     }
 
     @Transactional
+    public void breakUpCouple(Long coupleId) {
+        coupleRepository.updateDeletedById(coupleId);
+    }
+
+    @Transactional
     public Long createCouple(List<Member> members, LocalDate createCoupleDate) {
         CoupleMembers coupleMembers = new CoupleMembers(members);
         Couple couple = coupleRepository.save(new Couple(createCoupleDate, coupleMembers));
