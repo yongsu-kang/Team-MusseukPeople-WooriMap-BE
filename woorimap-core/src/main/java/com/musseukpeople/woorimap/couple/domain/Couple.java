@@ -14,6 +14,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import com.musseukpeople.woorimap.common.model.BaseEntity;
 import com.musseukpeople.woorimap.couple.domain.vo.CoupleMembers;
 import com.musseukpeople.woorimap.member.domain.Member;
@@ -38,6 +40,10 @@ public class Couple extends BaseEntity {
 
     @Embedded
     private CoupleMembers coupleMembers;
+
+    @Column(nullable = false)
+    @ColumnDefault("false")
+    private Boolean deleted;
 
     @OneToMany(mappedBy = "couple", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
@@ -76,6 +82,10 @@ public class Couple extends BaseEntity {
 
     public boolean isSame(Couple couple) {
         return this.id.equals(couple.id);
+    }
+
+    public boolean isBrokenUp() {
+        return this.deleted;
     }
 
     public void addPost(Post post) {
